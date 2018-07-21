@@ -1,0 +1,101 @@
+<html>
+  <head>
+  	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.2.3/milligram.min.css">
+  </head>
+
+  <body class="container" style="padding-top: 3%;">
+
+  	<h2 id="display"><a href="index.html">Simple Register</a></h2>
+
+  	<hr />
+  
+    <div class="column column-60">
+    	<label>Register a name</label>
+        <input id="name" type="text" value="">
+
+        <label>Button Register</label>
+        <button button id="setName">Register</button>
+
+        <label>Button Get Register</label>
+        <button button id="getName">Get Register</button>
+    </div> 
+
+
+    <script type="text/javascript" src="js/ethereumjs-testrpc.js"></script>
+    <script type="text/javascript" src="js/ethjs.js"></script>
+    <script type="text/javascript" src="js/abi.js"></script> 
+    <script type="text/javascript" src="js/bytecode.js"></script> 
+    
+
+    <script type="text/javascript">
+
+    	var eth = new Eth(TestRPC.provider());
+    	var el = function(id){ return document.querySelector(id); };
+
+
+        if (typeof window.web3 !== 'undefined' && typeof window.web3.currentProvider !== 'undefined') 
+       	{
+       		eth.setProvider(window.web3.currentProvider);
+       	} 
+       	else 
+       	{
+        	eth.setProvider(provider); // set to TestRPC if not available
+       	}
+
+
+       	eth.accounts().then((accounts) => 
+       	{
+     
+       		const SimpleRegister = eth.contract(contractABI, contractByteCode,
+       		{ 
+         		from: accounts[0], 
+         		gas: 300000, 
+         	});
+
+       		const simpleRegister = SimpleRegister.at('0x210157b0877526ca34b98818741eaa8ac6173058'); 
+
+
+       		console.log('Account[0]: ' + accounts[0]);
+       		console.log(simpleRegister);
+
+
+  			  el('#setName').addEventListener('click', () =>
+  			  {        	
+  				  simpleRegister.setName(el('#name').value).then((TxHash) => 
+  				  {        		
+  			   		console.log('Registration initialized. Transaction hash: ' + TxHash);
+  			   		alert("Registration initialized. Please wait for the confirmation.\nTransaction Hash: " + TxHash);
+  				  });
+  			  });   
+
+
+    			const filter = simpleRegister.Registrou();
+    			filter.new()
+    			filter.watch((err, res) => 
+    			{
+      				if(res[0]) 
+      				{
+        				console.log("Registration Done: " + res[0]);
+        				alert("Registration successful!!!");
+      				}
+    			});
+
+        }); 
+
+
+       	const simples = eth.contract(contractABI).at('0x210157b0877526ca34b98818741eaa8ac6173058');
+
+        el('#getName').addEventListener('click', () =>
+    		{ 
+    			simples.getName().then((value) => 
+    			{  
+    				el('#display').innerHTML = value[0];
+    				console.log(value[0]);
+    			});  
+    		});
+
+    </script>
+
+    
+  </body>
+</html>
